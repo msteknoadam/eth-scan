@@ -16,14 +16,12 @@ const isResult = (result: unknown): result is Result => {
  * @return {BalanceMap}
  */
 export const toBalanceMap = (addresses: string[], results: Array<bigint | Result>): BalanceMap => {
-  return results.reduce<BalanceMap>((current, next, index) => {
+  const m: BalanceMap = {};
+  for (const [index, next] of results.entries()) {
     const value = isResult(next) ? toNumber(next[1].slice(0, 32)) : next;
-
-    return {
-      ...current,
-      [addresses[index]]: value
-    };
-  }, {});
+    m[addresses[index]] = value;
+  }
+  return m;
 };
 
 /**
@@ -38,12 +36,11 @@ export const toNestedBalanceMap = (
   tokenAddresses: string[],
   results: Array<Array<bigint | Result>>
 ): BalanceMap<BalanceMap> => {
-  return results.reduce<BalanceMap<BalanceMap>>((current, next, index) => {
-    return {
-      ...current,
-      [addresses[index]]: toBalanceMap(tokenAddresses, next)
-    };
-  }, {});
+  const m: BalanceMap<BalanceMap> = {};
+  for (const [index, next] of results.entries()) {
+    m[addresses[index]] = toBalanceMap(tokenAddresses, next);
+  }
+  return m;
 };
 
 /**
